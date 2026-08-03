@@ -7,8 +7,11 @@ class ReportModel {
         $this->db = $db;
     }
 
-    public function getSummaryByStatus($user, $filters = array()) {
+    // รวม logic การ build WHERE clause จาก filters ที่เดิมซ้ำกันใน getSummaryByStatus() และ getDetailReport()
+    // $includeStatusDate = true เมื่อต้องการรวมเงื่อนไข status/date_from/date_to ด้วย (ใช้กับ getDetailReport)
+    private function buildFilterClause($user, $filters = array(), $includeStatusDate = false) {
         $where = buildDocumentWhereClause($user);
+
         if (!empty($filters['fiscal_year'])) {
             $fy = $this->db->escape($filters['fiscal_year']);
             $where .= " AND d.fiscal_year = '$fy'";
@@ -17,6 +20,27 @@ class ReportModel {
             $on = $this->db->escape($filters['office_name']);
             $where .= " AND d.office_name = '$on'";
         }
+
+        if ($includeStatusDate) {
+            if (!empty($filters['status'])) {
+                $s = $this->db->escape($filters['status']);
+                $where .= " AND d.status = '$s'";
+            }
+            if (!empty($filters['date_from'])) {
+                $df = $this->db->escape($filters['date_from']);
+                $where .= " AND DATE(d.created_at) >= '$df'";
+            }
+            if (!empty($filters['date_to'])) {
+                $dt = $this->db->escape($filters['date_to']);
+                $where .= " AND DATE(d.created_at) <= '$dt'";
+            }
+        }
+
+        return $where;
+    }
+
+    public function getSummaryByStatus($user, $filters = array()) {
+        $where = $this->buildFilterClause($user, $filters, false);
         return $this->db->fetchAll(
             "SELECT d.status, COUNT(*) AS cnt
              FROM documents d
@@ -27,27 +51,7 @@ class ReportModel {
     }
 
     public function getDetailReport($user, $filters = array()) {
-        $where = buildDocumentWhereClause($user);
-        if (!empty($filters['status'])) {
-            $s = $this->db->escape($filters['status']);
-            $where .= " AND d.status = '$s'";
-        }
-        if (!empty($filters['fiscal_year'])) {
-            $fy = $this->db->escape($filters['fiscal_year']);
-            $where .= " AND d.fiscal_year = '$fy'";
-        }
-        if (!empty($filters['office_name'])) {
-            $on = $this->db->escape($filters['office_name']);
-            $where .= " AND d.office_name = '$on'";
-        }
-        if (!empty($filters['date_from'])) {
-            $df = $this->db->escape($filters['date_from']);
-            $where .= " AND DATE(d.created_at) >= '$df'";
-        }
-        if (!empty($filters['date_to'])) {
-            $dt = $this->db->escape($filters['date_to']);
-            $where .= " AND DATE(d.created_at) <= '$dt'";
-        }
+        $where = $this->buildFilterClause($user, $filters, true);
         return $this->db->fetchAll(
             "SELECT d.*, CONCAT(u.prefix,' ',u.firstname,' ',u.lastname) AS submitter_name
              FROM documents d

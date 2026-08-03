@@ -70,8 +70,7 @@ $provinces        = getProvinceOptions();
                 <label class="form-label">วันสิ้นปีบัญชี</label>
                 <div class="input-group input-group-sm">
                   <input type="text" name="fiscal_year" id="fiscalYearInput"
-                         class="form-control form-control-sm" placeholder="วว/ดด เช่น 31/03" maxlength="5"
-                         value="" oninput="previewFiscalYear(this.value)">
+                         class="form-control form-control-sm" placeholder="วว/ดด เช่น 31/03" maxlength="5" value="">
                   <span class="input-group-text" id="fiscalPreview" style="font-size:0.78rem;min-width:90px;color:#555;">-</span>
                 </div>
               </div>
@@ -177,17 +176,7 @@ $provinces        = getProvinceOptions();
 
 <?php
 $extraJs = '<script>
-document.getElementById("fiscalYearInput").addEventListener("keypress", function(e) {
-  if (!/[\\d\\/]/.test(String.fromCharCode(e.which))) e.preventDefault();
-});
-document.getElementById("fiscalYearInput").addEventListener("input", function() {
-  var v = this.value.replace(/[^\\d\\/]/g,"");
-  var d = v.replace(/\\//g,"");
-  if (d.length >= 2 && v.indexOf("/")===-1) v = d.slice(0,2)+"/"+d.slice(2);
-  this.value = v;
-  previewFiscalYear(v, "fiscalPreview");
-});
 setupDateInput("registerDateInput", "registerDatePreview", true);
-previewFiscalYear(document.getElementById("fiscalYearInput").value, "fiscalPreview");
+setupDateInput("fiscalYearInput", "fiscalPreview", false);
 </script>';
 ?>

@@ -1,69 +1,80 @@
 <?php
 class Notification {
 
-    public static function create($db, $userId, $documentId, $type, $title, $message) {
-        $userId     = intval($userId);
-        $documentId = intval($documentId);
-        $type       = $db->escape($type);
-        $title      = $db->escape($title);
-        $message    = $db->escape($message);
-        $db->query("INSERT INTO notifications (user_id, document_id, type, title, message)
-                    VALUES ($userId, $documentId, '$type', '$title', '$message')");
-    }
-
-    public static function createForMultiple($db, $userIds, $documentId, $type, $title, $message) {
-        if (!is_array($userIds) || empty($userIds)) return;
-        foreach ($userIds as $userId) {
-            self::create($db, $userId, $documentId, $type, $title, $message);
-        }
-    }
-
-    // แจ้งเตือนที่ผูกกับเรื่องแจ้งปัญหา (issues) แทนเอกสาร
-    public static function createForIssue($db, $userId, $issueId, $type, $title, $message) {
+    // สร้างการแจ้งเตือน 1 รายการ ผูกกับ document หรือ issue ตาม $targetType
+    // $targetType: 'document' | 'issue'
+    public static function createFor($db, $userId, $targetId, $targetType, $type, $title, $message) {
         $userId  = intval($userId);
-        $issueId = intval($issueId);
+        $targetId = intval($targetId);
         $type    = $db->escape($type);
         $title   = $db->escape($title);
         $message = $db->escape($message);
-        $db->query("INSERT INTO notifications (user_id, issue_id, type, title, message)
-                    VALUES ($userId, $issueId, '$type', '$title', '$message')");
-    }
 
-    public static function createForMultipleIssue($db, $userIds, $issueId, $type, $title, $message) {
-        if (!is_array($userIds) || empty($userIds)) return;
-        foreach ($userIds as $userId) {
-            self::createForIssue($db, $userId, $issueId, $type, $title, $message);
+        if ($targetType === 'issue') {
+            $db->query("INSERT INTO notifications (user_id, issue_id, type, title, message)
+                        VALUES ($userId, $targetId, '$type', '$title', '$message')");
+        } else {
+            $db->query("INSERT INTO notifications (user_id, document_id, type, title, message)
+                        VALUES ($userId, $targetId, '$type', '$title', '$message')");
         }
     }
 
-    public static function getUsersByRole($db, $role, $officeName) {
+    public static function createForMultiple($db, $userIds, $targetId, $targetType, $type, $title, $message) {
+        if (!is_array($userIds) || empty($userIds)) return;
+        foreach ($userIds as $userId) {
+            self::createFor($db, $userId, $targetId, $targetType, $type, $title, $message);
+        }
+    }
+
+    // เดิม: create() / createForIssue() — คงชื่อเดิมไว้เป็น wrapper เพื่อไม่ต้องแก้ไฟล์ที่เรียกใช้ทั่วระบบ
+    public static function create($db, $userId, $documentId, $type, $title, $message) {
+        self::createFor($db, $userId, $documentId, 'document', $type, $title, $message);
+    }
+
+    public static function createForIssue($db, $userId, $issueId, $type, $title, $message) {
+        self::createFor($db, $userId, $issueId, 'issue', $type, $title, $message);
+    }
+
+    // เดิม: createForMultiple() (document) — คงชื่อเดิมไว้เป็น wrapper
+    public static function createForMultipleDocs($db, $userIds, $documentId, $type, $title, $message) {
+        self::createForMultiple($db, $userIds, $documentId, 'document', $type, $title, $message);
+    }
+
+    public static function createForMultipleIssue($db, $userIds, $issueId, $type, $title, $message) {
+        self::createForMultiple($db, $userIds, $issueId, 'issue', $type, $title, $message);
+    }
+
+    // รวม getUsersByRole() / getUsersByRoleOfficeOnly() เป็นเมธอดเดียว
+    // $includeHQ = true  -> เดิมคือ getUsersByRole()          (รวมส่วนกลางเสมอ)
+    // $includeHQ = false -> เดิมคือ getUsersByRoleOfficeOnly() (เฉพาะสำนักงานนั้น)
+    public static function getUsersByRole($db, $role, $officeName, $includeHQ = true) {
         $roleEsc = $db->escape($role);
         $offEsc  = $db->escape($officeName);
-        $hqEsc   = $db->escape(HQ_OFFICE);
-        $rows = $db->fetchAll(
-            "SELECT id FROM users
-             WHERE FIND_IN_SET('$roleEsc', REPLACE(roles, ', ', ','))
-               AND is_active = 1
-               AND (office_name = '$offEsc' OR office_name = '$hqEsc')"
-        );
+
+        if ($includeHQ) {
+            $hqEsc = $db->escape(HQ_OFFICE);
+            $rows = $db->fetchAll(
+                "SELECT id FROM users
+                 WHERE FIND_IN_SET('$roleEsc', REPLACE(roles, ', ', ','))
+                   AND is_active = 1
+                   AND (office_name = '$offEsc' OR office_name = '$hqEsc')"
+            );
+        } else {
+            $rows = $db->fetchAll(
+                "SELECT id FROM users
+                 WHERE FIND_IN_SET('$roleEsc', REPLACE(roles, ', ', ','))
+                   AND is_active = 1
+                   AND office_name = '$offEsc'"
+            );
+        }
         $ids = array();
         foreach ($rows as $row) { $ids[] = $row['id']; }
         return $ids;
     }
 
-    // เหมือน getUsersByRole แต่ไม่รวมส่วนกลางโดยอัตโนมัติ ใช้เมื่อยังไม่มีการส่งเรื่องไปส่วนกลาง
+    // wrapper คงชื่อเดิมไว้เพื่อ backward compatibility
     public static function getUsersByRoleOfficeOnly($db, $role, $officeName) {
-        $roleEsc = $db->escape($role);
-        $offEsc  = $db->escape($officeName);
-        $rows = $db->fetchAll(
-            "SELECT id FROM users
-             WHERE FIND_IN_SET('$roleEsc', REPLACE(roles, ', ', ','))
-               AND is_active = 1
-               AND office_name = '$offEsc'"
-        );
-        $ids = array();
-        foreach ($rows as $row) { $ids[] = $row['id']; }
-        return $ids;
+        return self::getUsersByRole($db, $role, $officeName, false);
     }
 
     public static function notifyStatusChange($db, $doc, $newStatus, $actorId) {
@@ -75,14 +86,14 @@ class Notification {
         switch ($newStatus) {
             case 'inspecting':
                 $ids = self::getUsersByRole($db, 'inspector', $officeName);
-                self::createForMultiple($db, $ids, $docId, 'status_changed',
+                self::createForMultipleDocs($db, $ids, $docId, 'status_changed',
                     'มีเอกสารใหม่รอตรวจสอบ',
                     'เอกสาร ' . $ticket . ' รอการตรวจสอบ กรุณาดำเนินการ');
                 break;
 
             case 'approving':
                 $ids = self::getUsersByRole($db, 'approver', $officeName);
-                self::createForMultiple($db, $ids, $docId, 'status_changed',
+                self::createForMultipleDocs($db, $ids, $docId, 'status_changed',
                     'เอกสารรออนุมัติ',
                     'เอกสาร ' . $ticket . ' ผ่านการตรวจสอบแล้ว รออนุมัติ');
                 self::create($db, $submitter, $docId, 'info',
@@ -92,7 +103,7 @@ class Notification {
 
             case 'operating':
                 $ids = self::getUsersByRole($db, 'operator', $officeName);
-                self::createForMultiple($db, $ids, $docId, 'status_changed',
+                self::createForMultipleDocs($db, $ids, $docId, 'status_changed',
                     'เอกสารรอดำเนินการ',
                     'เอกสาร ' . $ticket . ' อนุมัติแล้ว รอดำเนินการ');
                 self::create($db, $submitter, $docId, 'info',
@@ -105,7 +116,7 @@ class Notification {
                     'เอกสารเสร็จสิ้น',
                     'เอกสาร ' . $ticket . ' ดำเนินการเสร็จสิ้นแล้ว');
                 $ids = self::getUsersByRole($db, 'inspector', $officeName);
-                self::createForMultiple($db, $ids, $docId, 'completed',
+                self::createForMultipleDocs($db, $ids, $docId, 'completed',
                     'เอกสารเสร็จสิ้น',
                     'เอกสาร ' . $ticket . ' ดำเนินการเสร็จสิ้นแล้ว');
                 break;
@@ -118,7 +129,7 @@ class Notification {
 
             case 'pending':
                 $ids = self::getUsersByRole($db, 'inspector', $officeName);
-                self::createForMultiple($db, $ids, $docId, 'resubmitted',
+                self::createForMultipleDocs($db, $ids, $docId, 'resubmitted',
                     'เอกสารถูกส่งใหม่หลังแก้ไข',
                     'เอกสาร ' . $ticket . ' แก้ไขและส่งใหม่แล้ว รอตรวจสอบ');
                 break;
