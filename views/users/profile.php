@@ -96,7 +96,6 @@ $profileRoles = isset($user['roles']) ? array_map('trim', explode(',', $user['ro
         <div class="p-3.5">
           <form method="POST" action="?page=users&action=update_profile" id="passwordForm">
             <input type="hidden" name="csrf_token" value="<?php echo Session::getCsrf(); ?>">
-            <input type="hidden" name="position" value="<?php echo e($user['position']); ?>">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสผ่านปัจจุบัน <span class="text-red-600">*</span></label>

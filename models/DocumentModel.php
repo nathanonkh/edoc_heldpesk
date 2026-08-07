@@ -99,49 +99,4 @@ class DocumentModel {
         $seq  = intval($row['cnt']) + 1;
         return 'TKT-' . $year . '-' . str_pad($seq, 5, '0', STR_PAD_LEFT);
     }
-
-    public function countByStatus($user) {
-        $where = buildDocumentWhereClause($user);
-        $rows = $this->db->fetchAll(
-            "SELECT d.status, COUNT(*) AS cnt
-             FROM documents d
-             JOIN users u ON u.id = d.submitted_by
-             WHERE $where
-             GROUP BY d.status"
-        );
-        $result = array(
-            'pending'    => 0,
-            'inspecting' => 0,
-            'approving'  => 0,
-            'operating'  => 0,
-            'revision'   => 0,
-            'completed'  => 0,
-        );
-        foreach ($rows as $row) {
-            $result[$row['status']] = intval($row['cnt']);
-        }
-        return $result;
-    }
-
-    public function countMonthly($user) {
-        $where = buildDocumentWhereClause($user);
-        return $this->db->fetchAll(
-            "SELECT DATE_FORMAT(d.created_at, '%Y-%m') AS month, COUNT(*) AS count
-             FROM documents d
-             JOIN users u ON u.id = d.submitted_by
-             WHERE $where
-               AND d.created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-             GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
-             ORDER BY month ASC"
-        );
-    }
-
-    public function countByOfficeName() {
-        return $this->db->fetchAll(
-            "SELECT d.office_name AS office, COUNT(d.id) AS count
-             FROM documents d
-             GROUP BY d.office_name
-             ORDER BY count DESC"
-        );
-    }
 }

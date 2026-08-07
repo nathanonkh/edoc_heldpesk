@@ -99,25 +99,4 @@ class IssueModel {
         $seq  = intval($row['cnt']) + 1;
         return 'ISS-' . $year . '-' . str_pad($seq, 5, '0', STR_PAD_LEFT);
     }
-
-    public function countByStatus($user) {
-        $where = buildIssueWhereClause($user);
-        $rows = $this->db->fetchAll(
-            "SELECT i.status, COUNT(*) AS cnt
-             FROM issues i
-             JOIN users u ON u.id = i.submitted_by
-             WHERE $where
-             GROUP BY i.status"
-        );
-        $result = array(
-            'pending'      => 0,
-            'sent_central' => 0,
-            'in_progress'  => 0,
-            'completed'    => 0,
-        );
-        foreach ($rows as $row) {
-            $result[$row['status']] = intval($row['cnt']);
-        }
-        return $result;
-    }
 }

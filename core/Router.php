@@ -34,7 +34,7 @@ class Router {
                     'index','create','store','detail','edit',
                     'inspect','approve','bulk_approve','operate',
                     'revision','resubmit','view_file',
-                    'ajax_cooperatives','ajax_status','ajax_unread_count','ajax_mark_read','ajax_list'
+                    'ajax_cooperatives','ajax_status','ajax_unread_count','ajax_list'
                 );
                 $action = in_array($action, $validActions) ? $action : 'index';
                 $ctrl->$action();
