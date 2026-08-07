@@ -4,75 +4,81 @@ $officeOptions    = getOfficeOptions();
 $statusOptions    = getCooperativeStatusOptions();
 ?>
 
-<div class="breadcrumb-bar">
-  <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="?page=dashboard"><i class="fas fa-home"></i></a></li>
-    <li class="breadcrumb-item active">จัดการสหกรณ์</li>
-  </ol></nav>
+<div class="bg-white border-b border-slate-200 px-4 py-1.5 text-sm">
+  <nav aria-label="breadcrumb">
+    <ol class="flex items-center gap-1.5 text-slate-500">
+      <li><a class="hover:text-[#1565c0]" href="?page=dashboard"><i class="fas fa-home"></i></a></li>
+      <li class="text-slate-300">/</li>
+      <li class="text-slate-700 font-medium">จัดการสหกรณ์</li>
+    </ol>
+  </nav>
 </div>
 
-<main class="content-area">
+<main class="p-3 md:p-5 pb-6 md:pb-8 max-w-full overflow-x-hidden">
 
-  <div class="page-banner mb-3">
-    <div class="page-banner-icon bg-warning"><i class="fas fa-building"></i></div>
-    <div class="flex-grow-1">
-      <div class="page-banner-title">จัดการสหกรณ์</div>
-      <div class="page-banner-sub">ทั้งหมด <?php echo $totalItems; ?> แห่ง</div>
+  <div class="rounded-lg border border-blue-200 px-4 md:px-5 py-3.5 flex items-center gap-3.5 flex-wrap mb-4"
+       style="background: linear-gradient(135deg,#e3f2fd 0%,#f8f9ff 100%);">
+    <div class="w-11 h-11 rounded-[10px] bg-amber-500 text-white flex items-center justify-center text-xl flex-shrink-0">
+      <i class="fas fa-building"></i>
     </div>
-    <a href="?page=cooperatives&action=create" class="btn btn-success btn-sm flex-shrink-0">
-      <i class="fas fa-plus me-1"></i>เพิ่มสหกรณ์
+    <div class="flex-1">
+      <div class="text-base font-bold text-[#1a237e]">จัดการสหกรณ์</div>
+      <div class="text-sm text-slate-600">ทั้งหมด <?php echo $totalItems; ?> แห่ง</div>
+    </div>
+    <a href="?page=cooperatives&action=create" class="<?php echo uiBtnClasses('success'); ?> flex-shrink-0">
+      <i class="fas fa-plus mr-1"></i>เพิ่มสหกรณ์
     </a>
   </div>
 
   <!-- Search (AJAX) -->
   <form id="filterForm">
     <input type="hidden" name="page" value="cooperatives">
-    <div class="page-card mb-3">
-      <div class="page-card-header">
-        <span><i class="fas fa-filter me-2 text-secondary"></i>ค้นหาและกรอง</span>
-        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvCoop()">
-          <i class="fas fa-sliders-h me-1"></i>ตัวกรองละเอียด
+    <div class="bg-white border border-slate-200 rounded-md mb-4">
+      <div class="bg-slate-50 border-b border-slate-200 px-3.5 py-2.5 font-semibold text-sm flex items-center justify-between">
+        <span><i class="fas fa-filter mr-2 text-slate-500"></i>ค้นหาและกรอง</span>
+        <button type="button" class="<?php echo uiBtnClasses('outline'); ?>" onclick="toggleAdvCoop()">
+          <i class="fas fa-sliders-h mr-1"></i>ตัวกรองละเอียด
         </button>
       </div>
-      <div class="page-card-body">
-        <div class="row g-2 align-items-end mb-2">
-          <div class="col-12 col-sm-8 col-md-5">
-            <label class="form-label">ค้นหาทั่วไป</label>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
-              <input type="text" name="keyword" id="coopSearchInput" class="form-control"
+      <div class="p-3.5">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-2 items-end mb-2">
+          <div class="md:col-span-5">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">ค้นหาทั่วไป</label>
+            <div class="flex rounded-md border border-slate-300 overflow-hidden">
+              <span class="bg-slate-50 px-3 flex items-center border-r border-slate-300"><i class="fas fa-search text-slate-400"></i></span>
+              <input type="text" name="keyword" id="coopSearchInput" class="flex-1 min-w-0 px-2 py-1.5 text-sm outline-none"
                      placeholder="ชื่อ / รหัส / จังหวัด / เลขทะเบียน"
                      value="<?php echo e(isset($keyword) ? $keyword : ''); ?>">
             </div>
           </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetCoopFilter()"><i class="fas fa-times me-1"></i>ล้าง</button>
+          <div>
+            <button type="button" class="<?php echo uiBtnClasses('outline'); ?> w-full" onclick="resetCoopFilter()"><i class="fas fa-times mr-1"></i>ล้าง</button>
           </div>
         </div>
-        <div id="advCoopFilters" style="display:<?php echo (!empty($filterType)||!empty($filterOffice)||!empty($filterStatus))?'block':'none'; ?>;">
-          <hr class="my-2">
-          <div class="row g-2 align-items-end">
-            <div class="col-6 col-sm-4 col-md-3">
-              <label class="form-label">ประเภทสหกรณ์</label>
-              <select name="filter_type" class="form-select form-select-sm">
+        <div id="advCoopFilters" class="<?php echo (!empty($filterType)||!empty($filterOffice)||!empty($filterStatus))?'block':'hidden'; ?>">
+          <hr class="my-2 border-slate-200">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">ประเภทสหกรณ์</label>
+              <select name="filter_type" class="w-full text-sm border border-slate-300 rounded-md px-2 py-1.5">
                 <option value="">ทุกประเภท</option>
                 <?php foreach ($cooperativeTypes as $t): ?>
                 <option value="<?php echo e($t); ?>" <?php echo (isset($filterType) && $filterType===e($t)) ? 'selected' : ''; ?>><?php echo e($t); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
-            <div class="col-6 col-sm-4 col-md-3">
-              <label class="form-label">สถานะ</label>
-              <select name="filter_status" class="form-select form-select-sm">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">สถานะ</label>
+              <select name="filter_status" class="w-full text-sm border border-slate-300 rounded-md px-2 py-1.5">
                 <option value="">ทุกสถานะ</option>
                 <?php foreach ($statusOptions as $sk => $sv): ?>
                 <option value="<?php echo $sk; ?>" <?php echo (isset($filterStatus) && $filterStatus===$sk) ? 'selected' : ''; ?>><?php echo $sv; ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
-            <div class="col-12 col-sm-4 col-md-4">
-              <label class="form-label">สำนักงาน</label>
-              <select name="filter_office" class="form-select form-select-sm">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">สำนักงาน</label>
+              <select name="filter_office" class="w-full text-sm border border-slate-300 rounded-md px-2 py-1.5">
                 <option value="">ทุกสำนักงาน</option>
                 <?php foreach ($officeOptions as $off): ?>
                 <option value="<?php echo e($off); ?>" <?php echo (isset($filterOffice) && $filterOffice===e($off)) ? 'selected' : ''; ?>><?php echo e($off); ?></option>
@@ -95,7 +101,7 @@ $statusOptions    = getCooperativeStatusOptions();
 $extraJs = '<script>
 function toggleAdvCoop() {
   var el = document.getElementById("advCoopFilters");
-  el.style.display = (el.style.display === "none") ? "block" : "none";
+  el.classList.toggle("hidden");
 }
 
 var coopLoading = false;
@@ -123,7 +129,7 @@ function loadCoopList(page) {
     coopLoading = false;
     container.style.opacity = "1";
     if (!ok) {
-      Swal.fire({icon:"error",title:"โหลดข้อมูลไม่สำเร็จ",toast:true,position:"top-end",showConfirmButton:false,timer:2000});
+      showToast("error", "โหลดข้อมูลไม่สำเร็จ");
       return;
     }
     container.innerHTML = text;
@@ -147,7 +153,7 @@ function resetCoopFilter() {
 }
 
 function bindCoopListEvents() {
-  var pagLinks = document.querySelectorAll("#coopListContainer .pagination a.page-link");
+  var pagLinks = document.querySelectorAll("#coopListContainer nav a");
   for (var i = 0; i < pagLinks.length; i++) {
     pagLinks[i].addEventListener("click", function(e) {
       e.preventDefault();

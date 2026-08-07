@@ -1,118 +1,105 @@
-<div class="breadcrumb-bar">
-  <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item active"><i class="fas fa-home me-1"></i>หน้าหลัก</li>
-  </ol></nav>
+<div class="bg-white border-b border-slate-200 px-4 py-1.5 text-sm">
+  <nav aria-label="breadcrumb">
+    <ol class="flex items-center gap-1.5 text-slate-500">
+      <li class="text-slate-700 font-medium"><i class="fas fa-home mr-1"></i>หน้าหลัก</li>
+    </ol>
+  </nav>
 </div>
 
-<main class="content-area">
+<main class="p-3 md:p-5 pb-6 md:pb-8 max-w-full overflow-x-hidden">
 
-  <div class="page-banner mb-3">
-    <div class="page-banner-icon"><i class="fas fa-house-user"></i></div>
-    <div class="flex-grow-1">
-      <div class="page-banner-title">ยินดีต้อนรับ</div>
-      <div class="page-banner-sub">สวัสดี <?php echo e(trim($_SESSION['prefix'].' '.$_SESSION['firstname'].' '.$_SESSION['lastname'])); ?> | <?php echo e($_SESSION['office_name']); ?></div>
+  <div class="rounded-lg border border-blue-200 px-4 md:px-5 py-3.5 flex items-center gap-3.5 flex-wrap mb-4"
+       style="background: linear-gradient(135deg,#e3f2fd 0%,#f8f9ff 100%);">
+    <div class="w-11 h-11 rounded-[10px] bg-[#1565c0] text-white flex items-center justify-center text-xl flex-shrink-0">
+      <i class="fas fa-house-user"></i>
+    </div>
+    <div class="flex-1">
+      <div class="text-base font-bold text-[#1a237e]">ยินดีต้อนรับ</div>
+      <div class="text-sm text-slate-600">สวัสดี <?php echo e(trim($_SESSION['prefix'].' '.$_SESSION['firstname'].' '.$_SESSION['lastname'])); ?> | <?php echo e($_SESSION['office_name']); ?></div>
     </div>
     <?php if (Auth::hasRole('admin')): ?>
-    <a href="?page=announcements" class="btn btn-outline-light btn-sm flex-shrink-0">
-      <i class="fas fa-cog me-1"></i>จัดการหน้าหลัก
+    <a href="?page=announcements" class="border border-white text-white bg-white/10 hover:bg-white/20 text-sm px-3 py-1.5 rounded-md flex-shrink-0">
+      <i class="fas fa-cog mr-1"></i>จัดการหน้าหลัก
     </a>
     <?php endif; ?>
   </div>
 
   <!-- ทางลัด -->
-  <div class="row g-3 mb-3">
-    <div class="col-6 col-lg-3">
-      <a href="?page=documents&action=create" class="text-decoration-none">
-        <div class="stat-card stat-card-success">
-          <div class="stat-icon"><i class="fas fa-upload"></i></div>
-          <div class="text-dark fw-semibold" style="font-size:0.85rem;">นำส่งเอกสาร</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-lg-3">
-      <a href="?page=documents" class="text-decoration-none">
-        <div class="stat-card stat-card-primary">
-          <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
-          <div class="text-dark fw-semibold" style="font-size:0.85rem;">รายการเอกสาร</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-lg-3">
-      <a href="?page=issues&action=create" class="text-decoration-none">
-        <div class="stat-card stat-card-danger">
-          <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="text-dark fw-semibold" style="font-size:0.85rem;">แจ้งปัญหาการใช้งาน</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-lg-3">
-      <a href="?page=reports" class="text-decoration-none">
-        <div class="stat-card stat-card-info">
-          <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
-          <div class="text-dark fw-semibold" style="font-size:0.85rem;">รายงานเอกสาร</div>
-        </div>
-      </a>
-    </div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <a href="?page=documents&action=create" class="bg-white border border-slate-200 rounded-md p-3.5 text-center hover:-translate-y-0.5 hover:shadow-md transition-all">
+      <div class="text-2xl text-green-700 mb-1"><i class="fas fa-upload"></i></div>
+      <div class="text-slate-800 font-semibold text-sm">นำส่งเอกสาร</div>
+    </a>
+    <a href="?page=documents" class="bg-white border border-slate-200 rounded-md p-3.5 text-center hover:-translate-y-0.5 hover:shadow-md transition-all">
+      <div class="text-2xl text-[#1565c0] mb-1"><i class="fas fa-folder-open"></i></div>
+      <div class="text-slate-800 font-semibold text-sm">รายการเอกสาร</div>
+    </a>
+    <a href="?page=issues&action=create" class="bg-white border border-slate-200 rounded-md p-3.5 text-center hover:-translate-y-0.5 hover:shadow-md transition-all">
+      <div class="text-2xl text-red-700 mb-1"><i class="fas fa-exclamation-circle"></i></div>
+      <div class="text-slate-800 font-semibold text-sm">แจ้งปัญหาการใช้งาน</div>
+    </a>
+    <a href="?page=reports" class="bg-white border border-slate-200 rounded-md p-3.5 text-center hover:-translate-y-0.5 hover:shadow-md transition-all">
+      <div class="text-2xl text-sky-700 mb-1"><i class="fas fa-chart-bar"></i></div>
+      <div class="text-slate-800 font-semibold text-sm">รายงานเอกสาร</div>
+    </a>
   </div>
 
-  <div class="row g-3">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
     <!-- ประกาศ -->
-    <div class="col-12 col-lg-6">
-      <div class="page-card h-100">
-        <div class="page-card-header"><span><i class="fas fa-bullhorn me-2 text-warning"></i>ประกาศ</span></div>
-        <div class="page-card-body p-0" style="max-height:520px;overflow-y:auto;">
-          <?php if (empty($announcements)): ?>
-          <div class="px-3 py-5 text-center text-muted">
-            <i class="fas fa-bullhorn d-block fs-1 mb-3 text-secondary"></i>ยังไม่มีประกาศ
-          </div>
-          <?php else: foreach ($announcements as $a): ?>
-          <div class="px-3 py-3 border-bottom">
-            <div class="fw-bold" style="font-size:0.92rem;">
-              <?php if ($a['is_pinned']): ?><span class="badge bg-danger me-1"><i class="fas fa-thumbtack me-1"></i>ปักหมุด</span><?php endif; ?>
-              <?php echo e($a['title']); ?>
-            </div>
-            <div class="text-secondary mt-1" style="font-size:0.85rem;white-space:pre-line;"><?php echo e($a['content']); ?></div>
-            <div class="text-muted mt-2" style="font-size:0.75rem;">
-              <i class="fas fa-user me-1"></i><?php echo e($a['author_name']); ?>
-              &nbsp;|&nbsp;<i class="fas fa-clock me-1"></i><?php echo thaiDate($a['created_at']); ?>
-            </div>
-          </div>
-          <?php endforeach; endif; ?>
+    <div class="bg-white border border-slate-200 rounded-md overflow-hidden h-full">
+      <div class="bg-slate-50 border-b border-slate-200 px-3.5 py-2.5 font-semibold text-sm">
+        <i class="fas fa-bullhorn mr-2 text-amber-500"></i>ประกาศ
+      </div>
+      <div class="p-0 max-h-[520px] overflow-y-auto">
+        <?php if (empty($announcements)): ?>
+        <div class="px-3 py-16 text-center text-slate-400">
+          <i class="fas fa-bullhorn block text-4xl mb-3 text-slate-300"></i>ยังไม่มีประกาศ
         </div>
+        <?php else: foreach ($announcements as $a): ?>
+        <div class="px-3.5 py-3 border-b border-slate-100">
+          <div class="font-bold text-[0.92rem]">
+            <?php if ($a['is_pinned']): ?><span class="bg-red-600 text-white text-xs rounded px-1.5 py-0.5 mr-1"><i class="fas fa-thumbtack mr-1"></i>ปักหมุด</span><?php endif; ?>
+            <?php echo e($a['title']); ?>
+          </div>
+          <div class="text-slate-600 mt-1 text-sm whitespace-pre-line"><?php echo e($a['content']); ?></div>
+          <div class="text-slate-400 mt-2 text-xs">
+            <i class="fas fa-user mr-1"></i><?php echo e($a['author_name']); ?>
+            &nbsp;|&nbsp;<i class="fas fa-clock mr-1"></i><?php echo thaiDate($a['created_at']); ?>
+          </div>
+        </div>
+        <?php endforeach; endif; ?>
       </div>
     </div>
 
     <!-- วีดีโอสอนการใช้งาน -->
-    <div class="col-12 col-lg-6">
-      <div class="page-card h-100">
-        <div class="page-card-header"><span><i class="fas fa-video me-2 text-danger"></i>วีดีโอสอนการใช้งานโปรแกรม</span></div>
-        <div class="page-card-body p-0" style="max-height:520px;overflow-y:auto;">
-          <?php if (empty($videos)): ?>
-          <div class="px-3 py-5 text-center text-muted">
-            <i class="fas fa-video-slash d-block fs-1 mb-3 text-secondary"></i>ยังไม่มีวีดีโอ
-          </div>
-          <?php else: ?>
-          <div class="row g-3 p-3">
-            <?php foreach ($videos as $v): ?>
-            <div class="col-12 col-md-6">
-              <div class="border rounded overflow-hidden h-100">
-                <div class="ratio ratio-16x9">
-                  <iframe src="<?php echo e(youtubeEmbedUrl($v['video_url'])); ?>"
-                          title="<?php echo e($v['title']); ?>" allowfullscreen loading="lazy"></iframe>
-                </div>
-                <div class="p-2">
-                  <div class="fw-semibold small text-truncate"><?php echo e($v['title']); ?></div>
-                  <?php if (!empty($v['description'])): ?>
-                  <div class="text-muted text-truncate" style="font-size:0.76rem;"><?php echo e($v['description']); ?></div>
-                  <?php endif; ?>
-                </div>
-              </div>
-            </div>
-            <?php endforeach; ?>
-          </div>
-          <?php endif; ?>
+    <div class="bg-white border border-slate-200 rounded-md overflow-hidden h-full">
+      <div class="bg-slate-50 border-b border-slate-200 px-3.5 py-2.5 font-semibold text-sm">
+        <i class="fas fa-video mr-2 text-red-600"></i>วีดีโอสอนการใช้งานโปรแกรม
+      </div>
+      <div class="p-0 max-h-[520px] overflow-y-auto">
+        <?php if (empty($videos)): ?>
+        <div class="px-3 py-16 text-center text-slate-400">
+          <i class="fas fa-video-slash block text-4xl mb-3 text-slate-300"></i>ยังไม่มีวีดีโอ
         </div>
+        <?php else: ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
+          <?php foreach ($videos as $v): ?>
+          <div class="border border-slate-200 rounded overflow-hidden h-full">
+            <div class="aspect-video">
+              <iframe class="w-full h-full" src="<?php echo e(youtubeEmbedUrl($v['video_url'])); ?>"
+                      title="<?php echo e($v['title']); ?>" allowfullscreen loading="lazy"></iframe>
+            </div>
+            <div class="p-2">
+              <div class="font-semibold text-sm truncate"><?php echo e($v['title']); ?></div>
+              <?php if (!empty($v['description'])): ?>
+              <div class="text-slate-500 truncate text-xs"><?php echo e($v['description']); ?></div>
+              <?php endif; ?>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
       </div>
     </div>
 

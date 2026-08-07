@@ -133,6 +133,35 @@ function formatThaiDate2($value) {
 }
 
 // =====================================================
+// Tailwind UI helpers (single source of truth for
+// repeated markup fragments — badges, buttons, cards)
+// =====================================================
+
+// Renders a small colored pill badge. Every "status/role badge" in the
+// app now funnels through this one function instead of each view
+// hand-rolling <span class="badge bg-...">.
+function uiBadge($label, $colorClasses, $extraClasses = '') {
+    return '<span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ' . $colorClasses . ' ' . $extraClasses . '">' . $label . '</span>';
+}
+
+// Standard action-button classes (replaces Bootstrap btn/btn-sm/btn-outline-*)
+function uiBtnClasses($variant = 'primary', $size = 'sm') {
+    $sizeCls = $size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-4 py-2 text-sm';
+    $variants = array(
+        'primary'   => 'bg-[#1565c0] hover:bg-[#0d47a1] text-white',
+        'success'   => 'bg-green-700 hover:bg-green-800 text-white',
+        'danger'    => 'bg-red-700 hover:bg-red-800 text-white',
+        'warning'   => 'bg-amber-500 hover:bg-amber-600 text-white',
+        'info'      => 'bg-sky-600 hover:bg-sky-700 text-white',
+        'purple'    => 'bg-purple-700 hover:bg-purple-800 text-white',
+        'outline'   => 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-300',
+        'outline-danger' => 'bg-white hover:bg-red-50 text-red-600 border border-red-300',
+    );
+    $v = isset($variants[$variant]) ? $variants[$variant] : $variants['primary'];
+    return 'inline-flex items-center justify-center gap-1 rounded-md font-medium transition-colors ' . $sizeCls . ' ' . $v;
+}
+
+// =====================================================
 // Role Helpers
 // =====================================================
 
@@ -147,15 +176,16 @@ function getRoleLabel($role) {
     return isset($map[$role]) ? $map[$role] : $role;
 }
 
+// Tailwind badge color classes (replaces old bg-secondary/bg-primary/etc.)
 function getRoleBadgeClass($role) {
     $map = array(
-        'submitter' => 'bg-secondary',
-        'inspector' => 'bg-primary',
-        'approver'  => 'bg-info text-dark',
-        'operator'  => 'badge-purple',
-        'admin'     => 'bg-danger',
+        'submitter' => 'bg-slate-500 text-white',
+        'inspector' => 'bg-blue-600 text-white',
+        'approver'  => 'bg-sky-600 text-white',
+        'operator'  => 'bg-purple-600 text-white',
+        'admin'     => 'bg-red-600 text-white',
     );
-    return isset($map[$role]) ? $map[$role] : 'bg-secondary';
+    return isset($map[$role]) ? $map[$role] : 'bg-slate-500 text-white';
 }
 
 function getRolesFromUser($user) {
@@ -204,16 +234,16 @@ function getCooperativeStatusLabel($status) {
 
 function getCooperativeStatusBadge($status) {
     $map = array(
-        'active'       => 'bg-success',
-        'inactive'     => 'bg-secondary',
-        'ceased'       => 'bg-warning text-dark',
-        'litigation'   => 'bg-info text-dark',
-        'bankrupt'     => 'bg-dark',
-        'receivership' => 'bg-dark',
-        'dissolved'    => 'bg-danger',
-        'liquidation'  => 'bg-dark',
+        'active'       => 'bg-green-600 text-white',
+        'inactive'     => 'bg-slate-500 text-white',
+        'ceased'       => 'bg-amber-500 text-white',
+        'litigation'   => 'bg-sky-600 text-white',
+        'bankrupt'     => 'bg-slate-800 text-white',
+        'receivership' => 'bg-slate-800 text-white',
+        'dissolved'    => 'bg-red-600 text-white',
+        'liquidation'  => 'bg-slate-800 text-white',
     );
-    return isset($map[$status]) ? $map[$status] : 'bg-secondary';
+    return isset($map[$status]) ? $map[$status] : 'bg-slate-500 text-white';
 }
 
 // =====================================================
@@ -234,14 +264,40 @@ function docStatusLabel($status) {
 
 function docStatusBadgeClass($status) {
     $classes = array(
-        'pending'    => 'bg-warning text-dark',
-        'inspecting' => 'bg-primary',
-        'approving'  => 'bg-info text-dark',
-        'operating'  => 'badge-purple text-white',
-        'revision'   => 'bg-danger',
-        'completed'  => 'bg-success',
+        'pending'    => 'bg-amber-500 text-white',
+        'inspecting' => 'bg-blue-600 text-white',
+        'approving'  => 'bg-sky-600 text-white',
+        'operating'  => 'bg-purple-600 text-white',
+        'revision'   => 'bg-red-600 text-white',
+        'completed'  => 'bg-green-600 text-white',
     );
-    return isset($classes[$status]) ? $classes[$status] : 'bg-secondary';
+    return isset($classes[$status]) ? $classes[$status] : 'bg-slate-500 text-white';
+}
+
+// Solid header-background variant (used for banners/panel headers, matches
+// the old .bg-warning / .bg-primary usages but consolidated here too)
+function docStatusHeaderClass($status) {
+    $classes = array(
+        'pending'    => 'bg-amber-500',
+        'inspecting' => 'bg-blue-600',
+        'approving'  => 'bg-sky-600',
+        'operating'  => 'bg-purple-600',
+        'revision'   => 'bg-red-600',
+        'completed'  => 'bg-green-600',
+    );
+    return isset($classes[$status]) ? $classes[$status] : 'bg-slate-500';
+}
+
+function docStatusIcon($status) {
+    $icons = array(
+        'pending'    => 'fas fa-clock',
+        'inspecting' => 'fas fa-search',
+        'approving'  => 'fas fa-user-check',
+        'operating'  => 'fas fa-tasks',
+        'revision'   => 'fas fa-undo',
+        'completed'  => 'fas fa-check-circle',
+    );
+    return isset($icons[$status]) ? $icons[$status] : 'fas fa-circle';
 }
 
 function docFileLabel($num) {
@@ -362,12 +418,32 @@ function issueStatusLabel($status, $isCentral = false) {
 
 function issueStatusBadgeClass($status) {
     $classes = array(
-        'pending'      => 'bg-warning text-dark',
-        'sent_central' => 'badge-purple text-white',
-        'in_progress'  => 'bg-primary',
-        'completed'    => 'bg-success',
+        'pending'      => 'bg-amber-500 text-white',
+        'sent_central' => 'bg-purple-600 text-white',
+        'in_progress'  => 'bg-blue-600 text-white',
+        'completed'    => 'bg-green-600 text-white',
     );
-    return isset($classes[$status]) ? $classes[$status] : 'bg-secondary';
+    return isset($classes[$status]) ? $classes[$status] : 'bg-slate-500 text-white';
+}
+
+function issueStatusHeaderClass($status) {
+    $classes = array(
+        'pending'      => 'bg-amber-500',
+        'sent_central' => 'bg-purple-600',
+        'in_progress'  => 'bg-blue-600',
+        'completed'    => 'bg-green-600',
+    );
+    return isset($classes[$status]) ? $classes[$status] : 'bg-slate-500';
+}
+
+function issueStatusIcon($status) {
+    $icons = array(
+        'pending'      => 'fas fa-clock',
+        'sent_central' => 'fas fa-paper-plane',
+        'in_progress'  => 'fas fa-cogs',
+        'completed'    => 'fas fa-check-circle',
+    );
+    return isset($icons[$status]) ? $icons[$status] : 'fas fa-circle';
 }
 
 // ผู้ที่มีสิทธิ์ดำเนินการกับรายการแจ้งปัญหา (รับเรื่อง/ส่งต่อ/ปิดงาน) - เจ้าหน้าที่ตามสำนักงาน

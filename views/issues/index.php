@@ -1,33 +1,39 @@
-<div class="breadcrumb-bar">
-  <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="?page=dashboard"><i class="fas fa-home"></i></a></li>
-    <li class="breadcrumb-item active">แจ้งปัญหาการใช้งาน</li>
-  </ol></nav>
+<div class="bg-white border-b border-slate-200 px-4 py-1.5 text-sm">
+  <nav aria-label="breadcrumb">
+    <ol class="flex items-center gap-1.5 text-slate-500">
+      <li><a class="hover:text-[#1565c0]" href="?page=dashboard"><i class="fas fa-home"></i></a></li>
+      <li class="text-slate-300">/</li>
+      <li class="text-slate-700 font-medium">แจ้งปัญหาการใช้งาน</li>
+    </ol>
+  </nav>
 </div>
 
-<main class="content-area">
+<main class="p-3 md:p-5 pb-6 md:pb-8 max-w-full overflow-x-hidden">
 
-  <div class="page-banner mb-3">
-    <div class="page-banner-icon bg-danger"><i class="fas fa-exclamation-circle"></i></div>
-    <div class="flex-grow-1">
-      <div class="page-banner-title">แจ้งปัญหาการใช้งานโปรแกรม</div>
-      <div class="page-banner-sub">ทั้งหมด <span id="issueTotalCount"><?php echo $totalItems; ?></span> รายการ</div>
+  <div class="rounded-lg border border-blue-200 px-4 md:px-5 py-3.5 flex items-center gap-3.5 flex-wrap mb-4"
+       style="background: linear-gradient(135deg,#e3f2fd 0%,#f8f9ff 100%);">
+    <div class="w-11 h-11 rounded-[10px] bg-red-600 text-white flex items-center justify-center text-xl flex-shrink-0">
+      <i class="fas fa-exclamation-circle"></i>
     </div>
-    <a href="?page=issues&action=create" class="btn btn-danger btn-sm flex-shrink-0">
-      <i class="fas fa-plus me-1"></i>แจ้งปัญหาใหม่
+    <div class="flex-1">
+      <div class="text-base font-bold text-[#1a237e]">แจ้งปัญหาการใช้งานโปรแกรม</div>
+      <div class="text-sm text-slate-600">ทั้งหมด <span id="issueTotalCount"><?php echo $totalItems; ?></span> รายการ</div>
+    </div>
+    <a href="?page=issues&action=create" class="<?php echo uiBtnClasses('danger'); ?> flex-shrink-0">
+      <i class="fas fa-plus mr-1"></i>แจ้งปัญหาใหม่
     </a>
   </div>
 
   <!-- Filter (AJAX) -->
   <form id="filterForm">
     <input type="hidden" name="page" value="issues">
-    <div class="page-card mb-3">
-      <div class="page-card-header"><i class="fas fa-filter me-2 text-secondary"></i>ตัวกรอง</div>
-      <div class="page-card-body">
-        <div class="row g-2 align-items-end">
-          <div class="col-6 col-sm-4 col-md-2">
-            <label class="form-label">สถานะ</label>
-            <select name="status" class="form-select form-select-sm filter-input">
+    <div class="bg-white border border-slate-200 rounded-md mb-4">
+      <div class="bg-slate-50 border-b border-slate-200 px-3.5 py-2.5 font-semibold text-sm"><i class="fas fa-filter mr-2 text-slate-500"></i>ตัวกรอง</div>
+      <div class="p-3.5">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">สถานะ</label>
+            <select name="status" class="filter-input w-full text-sm border border-slate-300 rounded-md px-2 py-1.5">
               <option value="">ทั้งหมด</option>
               <option value="pending"      <?php echo $filters['status']==='pending'      ?'selected':''; ?>>รอตรวจสอบ</option>
               <option value="sent_central" <?php echo $filters['status']==='sent_central' ?'selected':''; ?>>ส่งส่วนกลาง</option>
@@ -35,25 +41,23 @@
               <option value="completed"    <?php echo $filters['status']==='completed'    ?'selected':''; ?>>สำเร็จ</option>
             </select>
           </div>
-          <div class="col-12 col-sm-8 col-md-3">
-            <label class="form-label">ค้นหา</label>
-            <input type="text" name="keyword" class="form-control form-control-sm filter-input"
+          <div class="col-span-2">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">ค้นหา</label>
+            <input type="text" name="keyword" class="filter-input w-full text-sm border border-slate-300 rounded-md px-2 py-1.5"
                    placeholder="ชื่อเรื่อง / ชื่อสหกรณ์ / เลขที่แจ้ง"
                    value="<?php echo e($filters['keyword']); ?>">
           </div>
-          <div class="col-6 col-sm-4 col-md-2">
-            <label class="form-label">วันที่เริ่มต้น</label>
-            <input type="date" name="date_from" class="form-control form-control-sm filter-input"
-                   value="<?php echo e($filters['date_from']); ?>">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">วันที่เริ่มต้น</label>
+            <input type="date" name="date_from" class="filter-input w-full text-sm border border-slate-300 rounded-md px-2 py-1.5" value="<?php echo e($filters['date_from']); ?>">
           </div>
-          <div class="col-6 col-sm-4 col-md-2">
-            <label class="form-label">วันที่สิ้นสุด</label>
-            <input type="date" name="date_to" class="form-control form-control-sm filter-input"
-                   value="<?php echo e($filters['date_to']); ?>">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">วันที่สิ้นสุด</label>
+            <input type="date" name="date_to" class="filter-input w-full text-sm border border-slate-300 rounded-md px-2 py-1.5" value="<?php echo e($filters['date_to']); ?>">
           </div>
-          <div class="col-12 col-sm-4 col-md-auto">
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetIssueFilter()">
-              <i class="fas fa-undo me-1"></i>รีเซ็ต
+          <div>
+            <button type="button" class="<?php echo uiBtnClasses('outline'); ?> w-full" onclick="resetIssueFilter()">
+              <i class="fas fa-undo mr-1"></i>รีเซ็ต
             </button>
           </div>
         </div>
@@ -95,7 +99,7 @@ function loadIssueList(page) {
     issueLoading = false;
     container.style.opacity = "1";
     if (!ok) {
-      Swal.fire({icon:"error",title:"โหลดข้อมูลไม่สำเร็จ",toast:true,position:"top-end",showConfirmButton:false,timer:2000});
+      showToast("error", "โหลดข้อมูลไม่สำเร็จ");
       return;
     }
     container.innerHTML = text;
@@ -119,7 +123,7 @@ function resetIssueFilter() {
 }
 
 function bindIssueListEvents() {
-  var pagLinks = document.querySelectorAll("#issueListContainer .pagination a.page-link");
+  var pagLinks = document.querySelectorAll("#issueListContainer nav a");
   for (var i = 0; i < pagLinks.length; i++) {
     pagLinks[i].addEventListener("click", function(e) {
       e.preventDefault();
