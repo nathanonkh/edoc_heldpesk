@@ -105,6 +105,9 @@ class UserController extends Controller {
 
     public function delete() {
         Auth::requireRole('admin');
+        // เดิมไม่มีการตรวจ CSRF ใน action ที่ระงับผู้ใช้ซึ่งเรียกผ่าน GET เพิ่มไว้เพื่อกัน CSRF
+        // (ฝั่ง frontend เปลี่ยนมาส่งเป็น POST พร้อม csrf_token แล้วผ่าน app.js: confirmDelete)
+        Auth::checkCsrf();
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         if ($id == $_SESSION['user_id']) {
             redirectWithFlash(APP_URL . '/?page=users', 'error', 'ไม่สามารถลบบัญชีตัวเองได้');
@@ -131,7 +134,9 @@ class UserController extends Controller {
         $user = $this->userModel->getById($id);
 
         $currentPw = isset($_POST['current_password']) ? $_POST['current_password'] : '';
-        if (sha1($currentPw) !== $user['password']) {
+        // ใช้ PasswordHash::verify() แทนการเทียบ sha1() ตรง ๆ
+        // เพื่อรองรับทั้ง hash รูปแบบใหม่ (มี salt) และรูปแบบเก่าที่ยังไม่ได้อัปเกรด
+        if (!PasswordHash::verify($currentPw, $user['password'])) {
             redirectWithFlash(APP_URL . '/?page=users&action=profile', 'error', 'รหัสผ่านปัจจุบันไม่ถูกต้อง');
         }
 

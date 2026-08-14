@@ -52,6 +52,12 @@ class DocumentController extends Controller {
         $officeName     = $this->db->escape($user['office_name']);
         $documentNumber = $this->db->escape(isset($_POST['document_number']) ? trim($_POST['document_number']) : '');
 
+        // ตรวจสอบรูปแบบปีบัญชีให้เป็นตัวเลขล้วนเท่านั้น เพราะค่านี้ถูกนำไปใช้เป็น
+        // ส่วนหนึ่งของ path โฟลเดอร์ปลายทางตอนอัปโหลดไฟล์ (กัน Path Traversal)
+        if (!preg_match('/^[0-9]{4}$/', $year)) {
+            redirectWithFlash(APP_URL . '/?page=documents&action=create', 'error', 'ปีบัญชีไม่ถูกต้อง');
+        }
+
         $coop = $this->db->fetchOne(
             "SELECT * FROM cooperatives WHERE id=$coopId AND type_name='$typeName'"
         );
@@ -387,6 +393,13 @@ class DocumentController extends Controller {
                     redirectWithFlash(APP_URL . '/?page=documents&action=edit&id=' . $docId,
                         'error', 'ไฟล์ที่ ' . $i . ': ' . $result['error']);
                 }
+
+                // ลบไฟล์เดิมออกจากระบบก่อน เพื่อไม่ให้ไฟล์เก่าค้างอยู่โดยไม่มีการอ้างอิง
+                $oldFileField = 'file_doc' . $i;
+                if (!empty($doc[$oldFileField])) {
+                    FileUpload::deleteFile($doc[$oldFileField]);
+                }
+
                 $fn = $this->db->escape($result['filename']);
                 $nn = $this->db->escape($result['original_name']);
                 $updates[] = "file_doc$i='$fn', file_doc{$i}_name='$nn'";
@@ -414,6 +427,25 @@ class DocumentController extends Controller {
 
         $doc = $this->docModel->getById($docId);
         if (!$doc) exit('ไม่พบเอกสาร');
+
+        // ============================================================
+        // แก้ IDOR: เดิมฟังก์ชันนี้เช็คแค่ Auth::requireLogin() (แค่ล็อกอินแล้วก็เปิดได้)
+        // ทำให้ผู้ใช้คนไหนก็ตามเดา id เอกสารแล้วเปิดไฟล์ PDF ของหน่วยงาน/ผู้อื่นได้
+        // ตอนนี้ใช้ logic การตรวจสิทธิ์แบบเดียวกับ detail() เพื่อจำกัดว่าเห็นได้เฉพาะ
+        // เอกสารที่ตนเองมีสิทธิ์เข้าถึงเท่านั้น
+        // ============================================================
+        $user = Auth::currentUser();
+        $canView = false;
+        if (userHasRole($user, 'admin') || isHQ($user)) {
+            $canView = true;
+        } elseif (userHasRole($user, 'submitter') && $doc['submitted_by'] == $user['id']) {
+            $canView = true;
+        } elseif (userHasAnyRole($user, array('inspector','approver','operator'))) {
+            $canView = ($doc['office_name'] === $user['office_name']);
+        }
+        if (!$canView) {
+            exit('คุณไม่มีสิทธิ์เข้าถึงไฟล์นี้');
+        }
 
         $field     = 'file_doc' . $fileNum;
         $nameField = 'file_doc' . $fileNum . '_name';

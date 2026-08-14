@@ -132,7 +132,49 @@ document.addEventListener('click', function(e) {
 });
 
 // =====================================================
+// Submit a POST request via a dynamically-built <form> (with CSRF token)
+// ใช้แทนการ window.location.href ตรง ๆ สำหรับ action ที่เปลี่ยนแปลง/ลบข้อมูล
+// เพื่อให้ทุก action แนบ csrf_token และเป็น POST เสมอ (กัน CSRF)
+// อ่าน token จาก <meta name="csrf-token"> ที่ฝังไว้ใน views/layout/header.php
+// =====================================================
+function submitPostAction(url, extraFields) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.style.display = 'none';
+
+    var tokenMeta = document.querySelector('meta[name="csrf-token"]');
+    var token = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+    var tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'csrf_token';
+    tokenInput.value = token;
+    form.appendChild(tokenInput);
+
+    if (extraFields) {
+        for (var k in extraFields) {
+            if (!extraFields.hasOwnProperty(k)) continue;
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = k;
+            inp.value = extraFields[k];
+            form.appendChild(inp);
+        }
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// =====================================================
 // Confirm-delete dialog (SweetAlert2)
+// เดิมฟังก์ชันนี้ทำ window.location.href = url (เป็น GET request เปล่า ๆ
+// ไม่มี CSRF token แนบไปด้วยเลย) ทำให้ action ลบ/ระงับผู้ใช้ถูกโจมตีแบบ
+// CSRF ได้ง่าย (เช่น หลอกให้เปิดหน้าเว็บที่ฝัง <img src="...&action=delete&id=1">)
+// ตอนนี้เปลี่ยนมาส่งเป็น POST พร้อม csrf_token ผ่าน submitPostAction() แทน
+// โดย signature ของฟังก์ชันนี้ (url, name) ยังเหมือนเดิมทุกประการ
+// จึงไม่ต้องแก้ไข onclick="confirmDelete(...)" ในหน้า view ใด ๆ เลย
 // =====================================================
 function confirmDelete(url, name) {
     Swal.fire({
@@ -145,7 +187,9 @@ function confirmDelete(url, name) {
         confirmButtonText: 'ยืนยัน',
         cancelButtonText: 'ยกเลิก'
     }).then(function(result) {
-        if (result.isConfirmed) { window.location.href = url; }
+        if (result.isConfirmed) {
+            submitPostAction(url);
+        }
     });
 }
 

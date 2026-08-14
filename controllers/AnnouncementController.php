@@ -33,6 +33,9 @@ class AnnouncementController extends Controller {
 
     public function delete() {
         Auth::requireRole('admin');
+        // เดิมไม่มีการตรวจ CSRF ใน action ลบที่เรียกผ่าน GET เพิ่มไว้เพื่อกัน CSRF
+        // (ฝั่ง frontend เปลี่ยนมาส่งเป็น POST พร้อม csrf_token แล้วผ่าน app.js: confirmDelete)
+        Auth::checkCsrf();
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $this->announcementModel->delete($id);
         redirectWithFlash(APP_URL . '/?page=announcements', 'success', 'ลบประกาศแล้ว');
@@ -50,6 +53,8 @@ class AnnouncementController extends Controller {
 
     public function delete_video() {
         Auth::requireRole('admin');
+        // เดิมไม่มีการตรวจ CSRF ใน action ลบที่เรียกผ่าน GET เพิ่มไว้เพื่อกัน CSRF
+        Auth::checkCsrf();
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $this->videoModel->delete($id);
         redirectWithFlash(APP_URL . '/?page=announcements', 'success', 'ลบวีดีโอแล้ว');

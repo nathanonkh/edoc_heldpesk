@@ -29,6 +29,19 @@ class FileUpload {
             return array('success' => false, 'error' => 'ไฟล์มีขนาดเกิน 10MB');
         }
 
+        // ============================================================
+        // ป้องกัน Path Traversal: $fiscalYear และ $cooperativeCode ใช้ต่อ
+        // เป็นส่วนหนึ่งของ path โฟลเดอร์ปลายทางโดยตรง (UPLOAD_DIR . $fiscalYear . '/' . $cooperativeCode)
+        // ถ้าไม่ตรวจสอบรูปแบบก่อน อาจถูกส่งค่าเช่น "../../../var/www/html" มาเขียนไฟล์
+        // ออกนอกโฟลเดอร์ uploads/ ได้ (แม้ชื่อไฟล์เองจะถูก sanitize อยู่แล้วก็ตาม)
+        // ============================================================
+        if (!preg_match('/^[0-9]{1,10}$/', $fiscalYear)) {
+            return array('success' => false, 'error' => 'ปีบัญชีไม่ถูกต้อง');
+        }
+        if (!preg_match('/^[A-Za-z0-9_\-]{1,50}$/', $cooperativeCode)) {
+            return array('success' => false, 'error' => 'รหัสสหกรณ์ไม่ถูกต้อง');
+        }
+
         $originalName = $file['name'];
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         if (!in_array($ext, self::$allowedExtensions)) {
@@ -53,8 +66,10 @@ class FileUpload {
             }
         }
 
+        // sanitize ticketCode ก่อนใช้ต่อชื่อไฟล์ด้วย เผื่อค่าที่ส่งเข้ามาไม่ผ่านการ generate ภายในระบบ
+        $ticketSafe  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $ticketCode);
         $safeName    = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
-        $filename    = $cooperativeCode . '_' . $ticketCode . '_doc' . $docNumber . '_' . $safeName . '.pdf';
+        $filename    = $cooperativeCode . '_' . $ticketSafe . '_doc' . intval($docNumber) . '_' . $safeName . '.pdf';
         $destination = $targetDir . $filename;
         $relativePath = $fiscalYear . '/' . $cooperativeCode . '/' . $filename;
 
@@ -92,6 +107,11 @@ class FileUpload {
             return array('success' => false, 'error' => 'ไฟล์มีขนาดเกิน 10MB');
         }
 
+        // ป้องกัน Path Traversal เช่นเดียวกับ upload() ด้านบน
+        if (!preg_match('/^[A-Za-z0-9_\-]{1,50}$/', $subDir)) {
+            return array('success' => false, 'error' => 'พาธไม่ถูกต้อง');
+        }
+
         $originalName = $file['name'];
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         if (!in_array($ext, self::$allowedAttachmentExtensions)) {
@@ -116,8 +136,9 @@ class FileUpload {
             }
         }
 
+        $ticketSafe  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $ticketCode);
         $safeName    = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
-        $filename    = $ticketCode . '_' . $safeName . '.' . $ext;
+        $filename    = $ticketSafe . '_' . $safeName . '.' . $ext;
         $destination = $targetDir . $filename;
         $relativePath = $subDir . '/' . $filename;
 

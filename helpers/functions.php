@@ -337,8 +337,11 @@ function canActionDocument($user, $doc) {
 }
 
 function buildDocumentWhereClause($user) {
+    // ใช้ $db->escape() (mysql_real_escape_string) แทน addslashes() เพื่อความสม่ำเสมอ
+    // กับ escape function เดียวที่ใช้ทั่วทั้งระบบ และรองรับ charset ให้ถูกต้อง
+    global $db;
     $uid     = intval($user['id']);
-    $offName = addslashes($user['office_name']);
+    $offName = $db->escape($user['office_name']);
     $hq      = isHQ($user);
     $roles   = getRolesFromUser($user);
 
@@ -463,7 +466,9 @@ function buildIssueWhereClause($user) {
     if (userHasRole($user, 'admin') || isHQ($user)) {
         return '1=1';
     }
-    $offName = addslashes($user['office_name']);
+    // ใช้ $db->escape() แทน addslashes() เพื่อความสม่ำเสมอกับ escape function หลักของระบบ
+    global $db;
+    $offName = $db->escape($user['office_name']);
     $uid     = intval($user['id']);
     return "(i.office_name = '$offName' OR i.submitted_by = $uid)";
 }

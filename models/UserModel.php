@@ -45,7 +45,9 @@ class UserModel {
 
     public function create($data) {
         $username     = $this->db->escape($data['username']);
-        $password     = sha1($data['password']);
+        // ใช้ PasswordHash::hash() (salted hmac-sha256) แทน sha1() เปล่า ๆ
+        // เพื่อป้องกัน rainbow table attack — ดู helpers/PasswordHash.php
+        $password     = $this->db->escape(PasswordHash::hash($data['password']));
         $prefix       = $this->db->escape($data['prefix']);
         $firstname    = $this->db->escape($data['firstname']);
         $lastname     = $this->db->escape($data['lastname']);
@@ -76,7 +78,8 @@ class UserModel {
         $email      = $this->db->escape(isset($data['email']) ? $data['email'] : '');
 
         if (!empty($data['password'])) {
-            $pw = sha1($data['password']);
+            // ใช้ PasswordHash::hash() แทน sha1()
+            $pw = $this->db->escape(PasswordHash::hash($data['password']));
             $this->db->query(
                 "UPDATE users SET prefix='$prefix', firstname='$firstname', lastname='$lastname',
                  roles='$roles', office_name='$officeName',
@@ -98,7 +101,8 @@ class UserModel {
     public function updateProfile($id, $data) {
         $id = intval($id);
         if (!empty($data['new_password'])) {
-            $pw = sha1($data['new_password']);
+            // ใช้ PasswordHash::hash() แทน sha1()
+            $pw = $this->db->escape(PasswordHash::hash($data['new_password']));
             $this->db->query("UPDATE users SET password='$pw' WHERE id=$id");
         }
     }

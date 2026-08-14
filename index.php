@@ -4,11 +4,29 @@ header('Content-Type: text/html; charset=UTF-8');
 require_once 'config/config.php';
 session_start();
 
+// =====================================================
+// แก้ปัญหา magic_quotes_gpc (PHP 5.2.3 / AppServ อาจเปิดใช้งานอยู่โดย default)
+// ถ้าเปิดอยู่ ค่าจาก $_GET/$_POST/$_COOKIE จะถูกใส่ backslash อัตโนมัติ
+// ซึ่งจะไปชนกับ $db->escape() (mysql_real_escape_string) ที่เรียกซ้ำอีกชั้น
+// ทำให้ข้อมูลที่มีเครื่องหมาย ' หรือ " ถูกบันทึกผิดเพี้ยน (backslash ซ้อน)
+// โค้ดส่วนนี้จะ strip slashes ออกก่อน ถ้าตรวจพบว่า magic_quotes_gpc เปิดอยู่
+// =====================================================
+if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+    function stripslashes_deep($value) {
+        return is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);
+    }
+    $_GET     = stripslashes_deep($_GET);
+    $_POST    = stripslashes_deep($_POST);
+    $_COOKIE  = stripslashes_deep($_COOKIE);
+    $_REQUEST = stripslashes_deep($_REQUEST);
+}
+
 require_once 'core/Session.php';
 require_once 'core/Model.php';
 require_once 'core/Controller.php';
 require_once 'core/Router.php';
 
+require_once 'helpers/PasswordHash.php';
 require_once 'helpers/Auth.php';
 require_once 'helpers/FileUpload.php';
 require_once 'helpers/Notification.php';

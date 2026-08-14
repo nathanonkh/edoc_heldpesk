@@ -28,6 +28,24 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
 
-  <script src="<?php echo APP_URL; ?>/app.js" defer></script>
+  <?php
+  // -----------------------------------------------------------------
+  // หมายเหตุ: เดิม <script src="app.js"> ใช้ attribute "defer" ซึ่งทำให้
+  // เบราว์เซอร์รันไฟล์นี้ "หลังจาก parse HTML ทั้งหน้าเสร็จ" เท่านั้น
+  // แต่ $extraJs (ที่แต่ละหน้าเรียกใช้ฟังก์ชันจาก app.js เช่น setupDateInput,
+  // setupPositionSelector) ถูกพิมพ์เป็น <script> ธรรมดาไว้ท้ายสุดของ
+  // views/layout/footer.php ซึ่งรันทันทีตอน parse มาถึง (เร็วกว่า defer script)
+  // ผลคือฟังก์ชันใน app.js ยังไม่ถูกประกาศตอนที่ extraJs เรียกใช้
+  // ทำให้เกิด "ReferenceError: setupDateInput is not defined" แบบเงียบ ๆ
+  // และช่อง preview วันที่ (registerDatePreview, fiscalPreview,
+  // submittedDatePreview) รวมถึง event listener อื่น ๆ ใน extraJs ของ
+  // หน้านั้นไม่ทำงานเลย
+  //
+  // แก้โดยตัด defer ออก: app.js มีแต่การประกาศฟังก์ชัน + ผูก event บน
+  // document เท่านั้น ไม่ได้อ่าน DOM element ทันทีที่โหลด จึงปลอดภัยที่จะ
+  // รันก่อน body ถูก parse เสร็จ พอ extraJs รันตอนท้าย body ฟังก์ชันก็พร้อมใช้แล้ว
+  // -----------------------------------------------------------------
+  ?>
+  <script src="<?php echo APP_URL; ?>/app.js"></script>
 </head>
 <body class="text-slate-800">

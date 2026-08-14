@@ -4,12 +4,17 @@ class Model {
     protected $conn;
 
     public function __construct() {
-        $this->conn = mysql_connect(DB_HOST, DB_USER, DB_PASS);
+        // ใช้ @ กัน warning มาตรฐานของ PHP ปนกับ error message ของเราเอง
+        $this->conn = @mysql_connect(DB_HOST, DB_USER, DB_PASS);
         if (!$this->conn) {
-            die('ไม่สามารถเชื่อมต่อฐานข้อมูลได้: ' . mysql_error());
+            // บันทึกรายละเอียดจริงไว้ใน error log ฝั่ง server เท่านั้น
+            // ไม่แสดงรายละเอียดการเชื่อมต่อ DB ให้ผู้ใช้ปลายทางเห็นโดยตรง
+            error_log('DB Connection Error: ' . mysql_error());
+            die('ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบ');
         }
         if (!mysql_select_db(DB_NAME, $this->conn)) {
-            die('ไม่พบฐานข้อมูล: ' . mysql_error());
+            error_log('DB Select Error: ' . mysql_error($this->conn));
+            die('ไม่สามารถเข้าใช้งานฐานข้อมูลได้ในขณะนี้ กรุณาติดต่อผู้ดูแลระบบ');
         }
         mysql_set_charset('utf8', $this->conn);
     }

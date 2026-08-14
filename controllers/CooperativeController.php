@@ -83,6 +83,10 @@ class CooperativeController extends Controller {
     }
 
     public function delete() {
+        // เดิม action นี้ถูกเรียกผ่านลิงก์ GET ตรง ๆ โดยไม่มีการตรวจ CSRF token เลย
+        // ทำให้ถูกโจมตีแบบ CSRF ได้ง่าย (เช่น ฝัง <img src="...&action=delete&id=1">)
+        // ตอนนี้ฝั่ง frontend (app.js: confirmDelete) เปลี่ยนมาส่งเป็น POST พร้อม csrf_token แล้ว
+        Auth::checkCsrf();
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $this->coopModel->delete($id);
         redirectWithFlash(APP_URL . '/?page=cooperatives', 'success', 'ลบข้อมูลสหกรณ์แล้ว');
